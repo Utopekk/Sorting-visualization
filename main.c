@@ -1,8 +1,9 @@
 #include <windows.h>
-#define WIDTH 200
+#define WIDTH 500
 #define HEIGHT 500
 
 int values[WIDTH];
+
 void initializeValues() {
     for (int i = 0; i < WIDTH; i++) {
         values[i] = rand() % WIDTH;
@@ -41,6 +42,30 @@ void bubbleSort(HDC hdc, int arr[], int len) {
     DeleteObject(backBufferBitmap);
     DeleteDC(backBufferDC);
 }
+void selectionSort(HDC hdc, int arr[], int len) {
+    HDC backBufferDC = CreateCompatibleDC(hdc);
+    HBITMAP backBufferBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
+    SelectObject(backBufferDC, backBufferBitmap);
+
+    for (int i = 0; i < len; i++) {
+        int current = i;
+        for (int j = i + 1; j < len; j++) {
+            if (arr[j] < arr[current]) {
+                current = j;
+            }
+        }
+        int temp = arr[i];
+        arr[i] = arr[current];
+        arr[current] = temp;
+
+        draw(backBufferDC);
+        Sleep(5);
+        BitBlt(hdc, 0, 0, WIDTH, HEIGHT, backBufferDC, 0, 0, SRCCOPY);
+    }
+    DeleteObject(backBufferBitmap);
+    DeleteDC(backBufferDC);
+}
+
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
         case WM_CREATE: {
@@ -51,7 +76,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
-            bubbleSort(hdc, values, WIDTH);
+            selectionSort(hdc, values, WIDTH);
             draw(hdc);
 
             EndPaint(hWnd, &ps);
