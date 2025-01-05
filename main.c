@@ -16,8 +16,17 @@ void initializeValues() {
 }
 
 void drawMenu(HDC hdc) {
-    const char* menuText = "Press '1' for Bubble Sort\nPress '2' for Selection Sort\n Press '3' for Quick Sort\n";
-    TextOut(hdc, 10, 10, menuText, strlen(menuText));
+    const char* menuText1 = "Press '1' for Bubble Sort";
+    const char* menuText2 = "Press '2' for Selection Sort";
+    const char* menuText3 = "Press '3' for Quick Sort";
+    const char* menuText4 = "Press '4' for Merge Sort";
+    const char* menuText5 = "Press '5' for Heap Sort";
+
+    TextOut(hdc, 10, 10, menuText1, strlen(menuText1));
+    TextOut(hdc, 10, 30, menuText2, strlen(menuText2));
+    TextOut(hdc, 10, 50, menuText3, strlen(menuText3));
+    TextOut(hdc, 10, 70, menuText4, strlen(menuText4));
+    TextOut(hdc, 10, 90, menuText5, strlen(menuText5));
 }
 
 void draw(HDC backBufferDC,COLORREF color) {
@@ -32,8 +41,8 @@ void draw(HDC backBufferDC,COLORREF color) {
     }
 }
 
-void updateVisualization(HDC hdc, HDC backBufferDC, HBITMAP backBufferBitmap) {
-    draw(backBufferDC, RGB(0, 0, 255));
+void updateVisualization(HDC hdc, HDC backBufferDC,COLORREF color) {
+    draw(backBufferDC, color);
     BitBlt(hdc, 0, 0, WIDTH, HEIGHT, backBufferDC, 0, 0, SRCCOPY);
 }
 
@@ -47,18 +56,15 @@ void bubbleSort(HDC hdc, int arr[], int len) {
     HDC backBufferDC = CreateCompatibleDC(hdc);
     HBITMAP backBufferBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
     SelectObject(backBufferDC, backBufferBitmap);
-
     for (int i = 0; i < len - 1; i++) {
         for (int j = 0; j < len - i - 1; j++) {
             if (arr[j] > arr[j + 1]) {
                 swap(&arr[j],&arr[j+1]);
+                updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
             }
-            updateVisualization(hdc, backBufferDC, backBufferBitmap);
         }
-
     }
-    draw(backBufferDC, RGB(0, 255, 0));
-    BitBlt(hdc, 0, 0, WIDTH, HEIGHT, backBufferDC, 0, 0, SRCCOPY);
+    updateVisualization(hdc, backBufferDC, RGB(0, 225, 0));
     DeleteObject(backBufferBitmap);
     DeleteDC(backBufferDC);
 }
@@ -68,20 +74,20 @@ void selectionSort(HDC hdc, int arr[], int len) {
     HBITMAP backBufferBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
     SelectObject(backBufferDC, backBufferBitmap);
 
-    for (int i = 0; i < len; i++) {
-        int current = i;
+    for (int i = 0; i < len - 1; i++) {
+        int minIndex = i;
         for (int j = i + 1; j < len; j++) {
-            if (arr[j] < arr[current]) {
-                current = j;
-                updateVisualization(hdc, backBufferDC, backBufferBitmap);
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
             }
         }
-        swap(&arr[i], &arr[current]);
-
-
+        if (minIndex != i) {
+            swap(&arr[i], &arr[minIndex]);
+            updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
+            Sleep(1); // Add a small delay to reduce lag
+        }
     }
-    draw(backBufferDC, RGB(0, 255, 0));
-    BitBlt(hdc, 0, 0, WIDTH, HEIGHT, backBufferDC, 0, 0, SRCCOPY);
+    updateVisualization(hdc, backBufferDC, RGB(0, 255, 0));
     DeleteObject(backBufferBitmap);
     DeleteDC(backBufferDC);
 }
@@ -99,14 +105,11 @@ int partition(HDC hdc, int arr[], int low, int high) {
             i++;
             swap(&arr[i], &arr[j]);
         }
-        updateVisualization(hdc, backBufferDC, backBufferBitmap);
+        updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
     }
 
     swap(&arr[i + 1], &arr[high]);
-
-    draw(backBufferDC, RGB(0, 0, 255));
-    Sleep(5);
-    BitBlt(hdc, 0, 0, WIDTH, HEIGHT, backBufferDC, 0, 0, SRCCOPY);
+    updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
 
     DeleteObject(backBufferBitmap);
     DeleteDC(backBufferDC);
@@ -123,6 +126,105 @@ void quickSort(HDC hdc, int arr[], int low, int high) {
     }
 }
 
+void merge(HDC hdc, int arr[], int l, int m, int r) {
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    int L[n1], R[n2];
+
+    for (int i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (int j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+
+    int i = 0, j = 0, k = l;
+
+    HDC backBufferDC = CreateCompatibleDC(hdc);
+    HBITMAP backBufferBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
+    SelectObject(backBufferDC, backBufferBitmap);
+
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+        updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+        updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+        updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
+    }
+
+    DeleteObject(backBufferBitmap);
+    DeleteDC(backBufferDC);
+}
+
+void mergeSort(HDC hdc, int arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+
+        mergeSort(hdc, arr, l, m);
+        mergeSort(hdc, arr, m + 1, r);
+
+        merge(hdc, arr, l, m, r);
+    }
+}
+
+void heapify(HDC hdc, int arr[], int len, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < len && arr[left] > arr[largest]) {
+        largest = left;
+    }
+
+    if (right < len && arr[right] > arr[largest]) {
+        largest = right;
+    }
+
+    if (largest != i) {
+        swap(&arr[i], &arr[largest]);
+        updateVisualization(hdc, CreateCompatibleDC(hdc), RGB(0, 0, 255));
+        heapify(hdc, arr, len, largest);
+    }
+}
+
+void heapSort(HDC hdc, int arr[], int len) {
+    HDC backBufferDC = CreateCompatibleDC(hdc);
+    HBITMAP backBufferBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
+    SelectObject(backBufferDC, backBufferBitmap);
+
+    for (int i = len / 2 - 1; i >= 0; i--) {
+        heapify(hdc, arr, len, i);
+    }
+
+    for (int i = len - 1; i > 0; i--) {
+        swap(&arr[0], &arr[i]);
+        updateVisualization(hdc, backBufferDC, RGB(0, 0, 255));
+        Sleep(1); // Add a small delay to reduce lag
+        heapify(hdc, arr, i, 0);
+    }
+
+    updateVisualization(hdc, backBufferDC, RGB(0, 255, 0));
+    DeleteObject(backBufferBitmap);
+    DeleteDC(backBufferDC);
+}
+
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
         case WM_KEYDOWN:
@@ -136,6 +238,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             }
             else if(wParam == '3'){
                 sortChoice = 3;
+                InvalidateRect(hWnd, NULL, TRUE);
+            }
+            else if(wParam == '4'){
+                sortChoice = 4;
+                InvalidateRect(hWnd, NULL, TRUE);
+            }
+            else if(wParam == '5'){
+                sortChoice = 5;
                 InvalidateRect(hWnd, NULL, TRUE);
             }
             break;
@@ -159,13 +269,25 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 HBITMAP backBufferBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
                 SelectObject(backBufferDC, backBufferBitmap);
 
-                draw(backBufferDC, RGB(0, 255, 0));
-                BitBlt(hdc, 0, 0, WIDTH, HEIGHT, backBufferDC, 0, 0, SRCCOPY);
+                updateVisualization(hdc, backBufferDC, RGB(0, 255, 0));
 
                 DeleteObject(backBufferBitmap);
                 DeleteDC(backBufferDC);
             }
+            if(sortChoice == 4) {
+                mergeSort(hdc, values, 0, WIDTH - 1);
+                HDC backBufferDC = CreateCompatibleDC(hdc);
+                HBITMAP backBufferBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
+                SelectObject(backBufferDC, backBufferBitmap);
 
+                updateVisualization(hdc, backBufferDC, RGB(0, 255, 0));
+
+                DeleteObject(backBufferBitmap);
+                DeleteDC(backBufferDC);
+            }
+            if(sortChoice == 5) {
+                heapSort(hdc, values, WIDTH);
+            }
             EndPaint(hWnd, &ps);
             return 0;
         }
