@@ -1,6 +1,7 @@
 // Sorting Algorithm Visualizer
-// This program visualizes sorting algorithms (Bubble Sort, Selection Sort, and Quick Sort)
+// This program visualizes sorting algorithms (Bubble Sort, Selection Sort, Quick Sort, Merge Sort and Heap Sort)
 // in a graphical interface using the Win32 API.
+
 
 #include <windows.h>
 #define WIDTH 700
